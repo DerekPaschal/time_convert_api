@@ -1,0 +1,8 @@
+version: '3.4'
+services:
+  time-convert-api:
+    container_name: time-convert-api
+    image: notquitenothing/time-convert-api:latest
+    restart: unless-stopped
+    ports:
+      - "4875:80"
