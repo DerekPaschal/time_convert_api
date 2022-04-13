@@ -99,25 +99,30 @@ function timeConvert(convertFrom, convertTo, amount) {
     convertTo = convertTo.toLowerCase().trim();
     amount = Number(amount.toLowerCase().trim());
 
+    let yearKeys = ["year", "years", "yr", "yrs", "y", "ys"];
+    let monthKeys = ["month", "months", "mo", "mos"];
+    let weekKeys = ["week", "weeks", "wk", "wks"];
+    let dayKeys = ["day", "days", "d", "ds"];
+
     let result = amount;
 
-    if (convertFrom == "year" || convertFrom == "years") {
+    if (yearKeys.includes(convertFrom)) {
         result *= daysInYear;
-    } else if (convertFrom == "month" || convertFrom == "months") {
+    } else if (monthKeys.includes(convertFrom)) {
         result *= daysInMonth;
-    } else if (convertFrom == "week" || convertFrom == "weeks") {
+    } else if (weekKeys.includes(convertFrom)) {
         result *= 7;
-    } else if (convertFrom != "day" && convertFrom != "days") {
+    } else if (dayKeys.includes(convertFrom)) {
         throw "Must convert from years, months, weeks, or days.";
     }
 
-    if (convertTo == "year" || convertTo == "years") {
+    if (yearKeys.includes(convertTo)) {
         result /= daysInYear;
-    } else if (convertTo == "month" || convertTo == "months") {
+    } else if (monthKeys.includes(convertTo)) {
         result /= daysInMonth;
-    } else if (convertFrom == "week" || convertFrom == "weeks") {
+    } else if (weekKeys.includes(convertTo)) {
         result /= 7;
-    } else if (convertTo != "day" && convertTo != "days") {
+    } else if (dayKeys.includes(convertTo)) {
         throw "Must convert to years, months, weeks, or days.";
     }
 
