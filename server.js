@@ -14,17 +14,11 @@ app.get('/', (req, res) => {
     res.send('Hello World');
 });
 
-app.get('/time-convert-xml', (req, res) => {
+app.get('/date-offset-xml', (req, res) => {
     try {
-        // Get query params
-        // Convert from
-        let convertFrom = req.query.from;
-        // Convert to
-        let convertTo = req.query.to;
-        // Amount
-        let amount = req.query.amount;
+        let result = dateOffsetAPI(req);
 
-        let result = Math.round(timeConvert(convertFrom, convertTo, amount));
+        console.log(result);
 
         res.writeHead(200, {
             'Access-Control-Allow-Origin': '*',
@@ -36,30 +30,102 @@ app.get('/time-convert-xml', (req, res) => {
         res.end('<result>'+result+'</result>');
 
     } catch (e) {
-        res.writeHead(500, {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'X-Requested-With',
-            'Cache': 'no-cache',
-            'Content-Type': 'text/html'
-        });
-
         console.error(e);
 
-        res.end('<error>'+e+'</error>');
+        try {
+            res.writeHead(500, {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'X-Requested-With',
+                'Cache': 'no-cache',
+                'Content-Type': 'text/html'
+            });
+
+            res.end('<error>'+e+'</error>');
+        } catch (e) {
+            console.error(e);
+        }
     }
 });
 
-app.get('/time-convert-json', (req, res) => {
+app.get('/date-offset-json', (req, res) => {
     try {
-        // Get query params
-        // Convert from
-        let convertFrom = req.query.from;
-        // Convert to
-        let convertTo = req.query.to;
-        // Amount
-        let amount = req.query.amount;
+        let result = dateOffsetAPI(req);
 
-        let result = Math.round(timeConvert(convertFrom, convertTo, amount));
+        console.log(result);
+
+        res.writeHead(200, {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'X-Requested-With',
+            'Cache': 'no-cache',
+            'Content-Type': 'application/json'
+        });
+
+        res.end(JSON.stringify({
+            "result": result
+        }));
+
+    } catch (e) {
+        console.error(e);
+
+        try {
+            res.writeHead(500, {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'X-Requested-With',
+                'Cache': 'no-cache',
+                'Content-Type': 'application/json'
+            });
+
+            res.end(JSON.stringify({
+                "error": e
+            }));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+});
+
+function dateOffsetAPI(req) {
+    // Get query params
+    // Get the amount of unitless offset
+    let offsetAmount  = req.query.amount;
+    // Get the unit of the offset (days, years, ect.)
+    let offsetUnit  = req.query.unit;
+    // Get the fallback date in case of error
+    let fallback  = req.query.default;
+
+    let result;
+
+    try {
+        if (offsetAmount==null || offsetUnit==null) {
+            throw "Missing required parameters 'amount' or 'unit'"
+        }
+
+        let daysOffset = timeConvert(offsetUnit, 'day', offsetAmount);
+
+        let resultDate = new Date();
+        resultDate.setDate(resultDate.getDate() - daysOffset);
+
+        let dd = String(resultDate.getDate()).padStart(2, '0');
+        let mm = String(resultDate.getMonth()+1).padStart(2, '0');
+        let yyyy = String(resultDate.getFullYear()).padStart(4, '0');
+
+        result = yyyy + "-" + mm + "-" + dd;
+    } catch (e) {
+        // Check for fallback value
+        if (fallback) {
+            // Fallback exists, use that
+            result = fallback;
+        } else {
+            // Fallback missing, throw error after all
+            throw e;
+        }
+    }
+    return result;
+}
+
+app.get('/time-convert-xml', (req, res) => {
+    try {
+        let result = timeConvertAPI(req);
 
         res.writeHead(200, {
             'Access-Control-Allow-Origin': '*',
@@ -68,31 +134,80 @@ app.get('/time-convert-json', (req, res) => {
             'Content-Type': 'text/html'
         });
 
+        res.end('<result>'+result+'</result>');
+
+    } catch (e) {
+        console.error(e);
+
+        try {
+            res.writeHead(500, {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'X-Requested-With',
+                'Cache': 'no-cache',
+                'Content-Type': 'text/html'
+            });
+
+            res.end('<error>'+e+'</error>');
+        } catch (e) {
+            console.error(e);
+        }
+    }
+});
+
+app.get('/time-convert-json', (req, res) => {
+    try {
+        let result = timeConvertAPI(req);
+
+        res.writeHead(200, {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'X-Requested-With',
+            'Cache': 'no-cache',
+            'Content-Type': 'application/json'
+        });
+
         res.end(JSON.stringify({
             "result": result
         }));
 
     } catch (e) {
-        res.writeHead(500, {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'X-Requested-With',
-            'Cache': 'no-cache',
-            'Content-Type': 'text/html'
-        });
-
         console.error(e);
-
-        res.end(JSON.stringify({
-            "error": e
-        }));
+        try {
+            res.writeHead(500, {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'X-Requested-With',
+                'Cache': 'no-cache',
+                'Content-Type': 'application/json'
+            });
+            
+            res.end(JSON.stringify({
+                "error": e
+            }));
+        } catch (e) {
+            console.error(e);
+        }
     }
 });
 
-function timeConvert(convertFrom, convertTo, amount) {
-    if (convertFrom == null || convertTo == null || amount == null
-        || convertFrom == "" || convertTo == "" || amount == "") {
+function timeConvertAPI(req) {
+    // Get query params
+    // Convert from
+    let convertFrom = req.query.from;
+    // Convert to
+    let convertTo = req.query.to;
+    // Amount
+    let amount = req.query.amount;
 
-         throw "Error converting: from="+convertFrom+"; to="+convertTo+"; amount="+amount;
+    let result = Math.round(timeConvert(convertFrom, convertTo, amount));
+
+    console.log("Converted: result="+result+"; from="+convertFrom+"; to="+convertTo+"; amount="+amount+"; default="+fallback);
+
+    return result;
+}
+
+function timeConvert(convertFrom, convertTo, amount) {
+    
+    if (!convertFrom || !convertTo || !amount) {
+        throw "Error converting: from="+convertFrom+"; to="+convertTo+"; amount="+amount;
     }
 
     convertFrom = convertFrom.toLowerCase().trim();
@@ -113,7 +228,9 @@ function timeConvert(convertFrom, convertTo, amount) {
     } else if (weekKeys.includes(convertFrom)) {
         result *= 7;
     } else if (dayKeys.includes(convertFrom)) {
-        throw "Must convert from years, months, weeks, or days.";
+        // Do nothing, result is already in days
+    } else {
+        throw "Must convert from years, months, weeks, or days. Input is: "+convertFrom;
     }
 
     if (yearKeys.includes(convertTo)) {
@@ -123,7 +240,9 @@ function timeConvert(convertFrom, convertTo, amount) {
     } else if (weekKeys.includes(convertTo)) {
         result /= 7;
     } else if (dayKeys.includes(convertTo)) {
-        throw "Must convert to years, months, weeks, or days.";
+        // Do nothing, result is already in days
+    } else {
+        throw "Must convert to years, months, weeks, or days. Input is: "+convertTo;
     }
 
     return result;
