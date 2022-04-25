@@ -20,27 +20,13 @@ app.get('/date-offset-xml', (req, res) => {
 
         console.log(result);
 
-        res.writeHead(200, {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'X-Requested-With',
-            'Cache': 'no-cache',
-            'Content-Type': 'text/html'
-        });
-
-        res.end('<result>'+result+'</result>');
+        res.send('<result>'+result+'</result>');
 
     } catch (e) {
         console.error(e);
 
         try {
-            res.writeHead(500, {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'X-Requested-With',
-                'Cache': 'no-cache',
-                'Content-Type': 'text/html'
-            });
-
-            res.end('<error>'+e+'</error>');
+            res.status(500).send('<error>'+e+'</error>');
         } catch (e) {
             console.error(e);
         }
@@ -53,14 +39,7 @@ app.get('/date-offset-json', (req, res) => {
 
         console.log(result);
 
-        res.writeHead(200, {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'X-Requested-With',
-            'Cache': 'no-cache',
-            'Content-Type': 'application/json'
-        });
-
-        res.end(JSON.stringify({
+        res.send(JSON.stringify({
             "result": result
         }));
 
@@ -68,14 +47,7 @@ app.get('/date-offset-json', (req, res) => {
         console.error(e);
 
         try {
-            res.writeHead(500, {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'X-Requested-With',
-                'Cache': 'no-cache',
-                'Content-Type': 'application/json'
-            });
-
-            res.end(JSON.stringify({
+            res.status(500).send(JSON.stringify({
                 "error": e
             }));
         } catch (e) {
@@ -127,27 +99,13 @@ app.get('/time-convert-xml', (req, res) => {
     try {
         let result = timeConvertAPI(req);
 
-        res.writeHead(200, {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'X-Requested-With',
-            'Cache': 'no-cache',
-            'Content-Type': 'text/html'
-        });
-
-        res.end('<result>'+result+'</result>');
+        res.send('<result>'+result+'</result>');
 
     } catch (e) {
         console.error(e);
 
         try {
-            res.writeHead(500, {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'X-Requested-With',
-                'Cache': 'no-cache',
-                'Content-Type': 'text/html'
-            });
-
-            res.end('<error>'+e+'</error>');
+            res.status(500).send('<error>'+e+'</error>');
         } catch (e) {
             console.error(e);
         }
@@ -158,28 +116,14 @@ app.get('/time-convert-json', (req, res) => {
     try {
         let result = timeConvertAPI(req);
 
-        res.writeHead(200, {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Headers': 'X-Requested-With',
-            'Cache': 'no-cache',
-            'Content-Type': 'application/json'
-        });
-
-        res.end(JSON.stringify({
+        res.send(JSON.stringify({
             "result": result
         }));
 
     } catch (e) {
         console.error(e);
-        try {
-            res.writeHead(500, {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'X-Requested-With',
-                'Cache': 'no-cache',
-                'Content-Type': 'application/json'
-            });
-            
-            res.end(JSON.stringify({
+        try {           
+            res.status(500).send(JSON.stringify({
                 "error": e
             }));
         } catch (e) {
